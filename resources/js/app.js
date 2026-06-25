@@ -5,6 +5,10 @@ Livewire.start()
 import './bootstrap';
 
 import flatpickr from 'flatpickr';
+import Chart from 'chart.js/auto';
+
+// Make Chart available globally
+window.Chart = Chart;
 
 Chart.defaults.font.family = '"Inter", sans-serif';
 Chart.defaults.font.weight = 500;

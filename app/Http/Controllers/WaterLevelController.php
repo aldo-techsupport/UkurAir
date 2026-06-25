@@ -10,7 +10,7 @@ class WaterLevelController extends Controller
     public function index()
     {
         $latest = WaterLevel::latest()->first();
-        $history = WaterLevel::latest()->limit(50)->get()->reverse();
+        $history = WaterLevel::latest()->limit(50)->get();
 
         return view('pages.monitoring.dashboard', compact('latest', 'history'));
     }
@@ -50,10 +50,11 @@ class WaterLevelController extends Controller
     public function apiHistory(Request $request)
     {
         $limit = $request->input('limit', 50);
-        $data = WaterLevel::latest()->limit($limit)->get()->reverse();
+        $data = WaterLevel::latest()->limit($limit)->get();
 
-        return response()->json($data->map(function ($item) {
-            return [
+        $result = [];
+        foreach ($data as $item) {
+            $result[] = [
                 'id' => $item->id,
                 'device_id' => $item->device_id,
                 'tinggi' => $item->tinggi,
@@ -63,6 +64,8 @@ class WaterLevelController extends Controller
                 'waktu' => $item->updated_at->format('H:i:s'),
                 'waktu_full' => $item->updated_at->format('d M Y H:i:s'),
             ];
-        }));
+        }
+
+        return response()->json($result);
     }
 }

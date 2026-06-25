@@ -252,7 +252,20 @@
             _pollInterval: null,
 
             init() {
-                this.initChart();
+                // Check if Chart.js is loaded before initializing chart
+                if (typeof Chart !== 'undefined') {
+                    this.initChart();
+                } else {
+                    // Wait for Chart.js to load
+                    const checkChart = setInterval(() => {
+                        if (typeof Chart !== 'undefined') {
+                            clearInterval(checkChart);
+                            this.initChart();
+                        }
+                    }, 100);
+                    // Stop checking after 5 seconds
+                    setTimeout(() => clearInterval(checkChart), 5000);
+                }
                 this.fetchData();
                 this._startPolling(5000);
             },
@@ -263,6 +276,11 @@
             },
 
             initChart() {
+                // Check if Chart.js is available
+                if (typeof Chart === 'undefined') {
+                    return;
+                }
+                
                 const ctx = document.getElementById('waterChart').getContext('2d');
                 const gradient = ctx.createLinearGradient(0, 0, 0, 280);
                 gradient.addColorStop(0, 'rgba(103, 191, 255, 0.3)');
@@ -327,8 +345,9 @@
                 try {
                     const [latestRes, historyRes] = await Promise.all([
                         fetch('/api/water-level/latest'),
-                        fetch('/api/water-level/history?limit=50'),
+                        fetch('/api/water-level/history?limit=20'),
                     ]);
+                    
                     const latestData = await latestRes.json();
                     const historyData = await historyRes.json();
 
@@ -338,7 +357,7 @@
                     this.latest.waktu = latestData.waktu;
                     this.lastSeen = latestData.last_seen ? new Date(latestData.last_seen) : null;
                     this.deviceOnline = this.lastSeen ? (Date.now() - this.lastSeen.getTime()) < 120000 : false;
-
+                    
                     const elapsed = Date.now() - this._lastToggle;
 
                     if (this._pendingRelay !== null) {
@@ -375,15 +394,11 @@
                         this.latest.mode = latestData.mode;
                     }
 
-                    this.historyData = historyData;
+                    // Use JSON parse/stringify to avoid Alpine.js reactivity issues
+                    this.historyData = JSON.parse(JSON.stringify(historyData));
                     this.connected = true;
-
-                    if (this.chart) {
-                        this.chart.data.labels = historyData.map(d => d.waktu_full);
-                        this.chart.data.datasets[0].data = [...historyData.map(d => d.tinggi)];
-                        this.chart.update('active');
-                    }
                 } catch (e) {
+                    console.error('fetchData error:', e);
                     this.connected = false;
                     this.deviceOnline = false;
                 }
