@@ -67,10 +67,18 @@ class MqttListenCommand extends Command
     private function handleMessage(string $payload): void
     {
         try {
+            $payload = trim($payload);
+            $payload = html_entity_decode($payload, ENT_QUOTES, 'UTF-8');
+
             $data = json_decode($payload, true);
 
-            if (!$data || !isset($data['tinggi'])) {
-                $this->warn("Payload tidak valid: {$payload}");
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->warn("JSON decode error: " . json_last_error_msg() . " | Payload: {$payload}");
+                return;
+            }
+
+            if (!is_array($data) || !array_key_exists('tinggi', $data)) {
+                $this->warn("Payload tidak valid (missing 'tinggi'): {$payload}");
                 return;
             }
 

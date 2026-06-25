@@ -43,6 +43,7 @@ class WaterLevelController extends Controller
             'relay' => $latest->relay,
             'mode' => $latest->mode,
             'waktu' => $latest->updated_at->format('d M Y H:i:s'),
+            'last_seen' => $latest->updated_at->toISOString(),
         ]);
     }
 

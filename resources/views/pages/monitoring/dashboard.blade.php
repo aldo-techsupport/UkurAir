@@ -60,9 +60,9 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pemantauan real-time ketinggian air tandon rumah tangga</p>
             </div>
             <div class="flex items-center gap-2">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" :class="connected ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'">
-                    <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="connected ? 'bg-green-500 animate-pulse' : 'bg-red-500'"></span>
-                    <span x-text="connected ? 'Terhubung' : 'Memuat...'"></span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" :class="deviceOnline ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'">
+                    <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="deviceOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'"></span>
+                    <span x-text="!connected ? 'Memuat...' : (deviceOnline ? 'Device Online' : 'Device Offline')"></span>
                 </span>
             </div>
         </div>
@@ -94,28 +94,28 @@
             <div class="col-span-12 sm:col-span-6 xl:col-span-3">
                 <div class="bg-white dark:bg-gray-800 shadow-xs rounded-xl p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="latest.relay ? 'bg-green-500/20' : 'bg-gray-500/20'">
-                            <svg class="w-5 h-5" :class="latest.relay ? 'text-green-500' : 'text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="relayOn ? 'bg-green-500/20' : 'bg-gray-500/20'">
+                            <svg class="w-5 h-5" :class="relayOn ? 'text-green-500' : 'text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
                         <div class="checkbox-wrapper-25">
-                            <input type="checkbox" :checked="latest.relay" @change="toggleRelay()" :disabled="relayLoading">
+                            <input type="checkbox" x-model="relayOn" @change="toggleRelay()" :disabled="relayLoading">
                         </div>
                     </div>
-                    <div class="text-2xl font-bold" :class="latest.relay ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'" x-text="latest.relay ? 'ON' : 'OFF'">--</div>
+                    <div class="text-2xl font-bold" :class="relayOn ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'" x-text="relayOn ? 'ON' : 'OFF'">--</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Relay</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-6 xl:col-span-3">
                 <div class="bg-white dark:bg-gray-800 shadow-xs rounded-xl p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="latest.mode === 'AUTO' ? 'bg-blue-500/20' : 'bg-orange-500/20'">
-                            <svg class="w-5 h-5" :class="latest.mode === 'AUTO' ? 'text-blue-500' : 'text-orange-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modeAuto ? 'bg-blue-500/20' : 'bg-orange-500/20'">
+                            <svg class="w-5 h-5" :class="modeAuto ? 'text-blue-500' : 'text-orange-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </div>
                         <div class="checkbox-wrapper-25">
-                            <input type="checkbox" :checked="latest.mode === 'AUTO'" @change="toggleMode()" :disabled="modeLoading">
+                            <input type="checkbox" x-model="modeAuto" @change="toggleMode()" :disabled="modeLoading">
                         </div>
                     </div>
-                    <div class="text-2xl font-bold" :class="latest.mode === 'AUTO' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'" x-text="latest.mode || '--'">--</div>
+                    <div class="text-2xl font-bold" :class="modeAuto ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'" x-text="modeAuto ? 'AUTO' : 'MANUAL'">--</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Mode</div>
                 </div>
             </div>
@@ -238,15 +238,28 @@
                 @endforeach
             ],
             connected: false,
+            deviceOnline: false,
+            lastSeen: null,
             chart: null,
             relayLoading: false,
             modeLoading: false,
+            relayOn: {{ $latest && $latest->relay ? 'true' : 'false' }},
+            modeAuto: {{ $latest && $latest->mode === 'AUTO' ? 'true' : 'false' }},
             notif: null,
+            _lastToggle: 0,
+            _pendingRelay: null,
+            _pendingMode: null,
+            _pollInterval: null,
 
             init() {
                 this.initChart();
                 this.fetchData();
-                setInterval(() => this.fetchData(), 5000);
+                this._startPolling(5000);
+            },
+
+            _startPolling(ms) {
+                if (this._pollInterval) clearInterval(this._pollInterval);
+                this._pollInterval = setInterval(() => this.fetchData(), ms);
             },
 
             initChart() {
@@ -319,17 +332,60 @@
                     const latestData = await latestRes.json();
                     const historyData = await historyRes.json();
 
-                    this.latest = latestData;
+                    this.latest.device_id = latestData.device_id;
+                    this.latest.tinggi = latestData.tinggi;
+                    this.latest.status = latestData.status;
+                    this.latest.waktu = latestData.waktu;
+                    this.lastSeen = latestData.last_seen ? new Date(latestData.last_seen) : null;
+                    this.deviceOnline = this.lastSeen ? (Date.now() - this.lastSeen.getTime()) < 120000 : false;
+
+                    const elapsed = Date.now() - this._lastToggle;
+
+                    if (this._pendingRelay !== null) {
+                        if (latestData.relay === this._pendingRelay) {
+                            this._pendingRelay = null;
+                            this.relayOn = latestData.relay;
+                            this.latest.relay = latestData.relay;
+                            if (!this._pendingMode) this._startPolling(5000);
+                        } else if (elapsed > 30000) {
+                            this._pendingRelay = null;
+                            this.relayOn = latestData.relay;
+                            this.latest.relay = latestData.relay;
+                            if (!this._pendingMode) this._startPolling(5000);
+                        }
+                    } else if (elapsed > 10000) {
+                        this.relayOn = latestData.relay;
+                        this.latest.relay = latestData.relay;
+                    }
+
+                    if (this._pendingMode !== null) {
+                        if (latestData.mode === this._pendingMode) {
+                            this._pendingMode = null;
+                            this.modeAuto = latestData.mode === 'AUTO';
+                            this.latest.mode = latestData.mode;
+                            if (!this._pendingRelay) this._startPolling(5000);
+                        } else if (elapsed > 30000) {
+                            this._pendingMode = null;
+                            this.modeAuto = latestData.mode === 'AUTO';
+                            this.latest.mode = latestData.mode;
+                            if (!this._pendingRelay) this._startPolling(5000);
+                        }
+                    } else if (elapsed > 10000) {
+                        this.modeAuto = latestData.mode === 'AUTO';
+                        this.latest.mode = latestData.mode;
+                    }
+
                     this.historyData = historyData;
                     this.connected = true;
 
                     if (this.chart) {
-                        this.chart.data.labels = historyData.map(d => d.waktu);
-                        this.chart.data.datasets[0].data = historyData.map(d => d.tinggi);
-                        this.chart.update('none');
+                        this.chart.data.labels = historyData.map(d => d.waktu_full);
+                        this.chart.data.datasets[0].data = [...historyData.map(d => d.tinggi)];
+                        this.chart.update('active');
                     }
                 } catch (e) {
                     this.connected = false;
+                    this.deviceOnline = false;
                 }
             },
 
@@ -367,6 +423,11 @@
 
             async toggleRelay() {
                 this.relayLoading = true;
+                this._lastToggle = Date.now();
+                this.latest.relay = this.relayOn;
+                const expectedRelay = this.relayOn;
+                this._pendingRelay = expectedRelay;
+                this._startPolling(1000);
                 try {
                     const res = await fetch('/api/device/relay', {
                         method: 'POST',
@@ -374,16 +435,23 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         },
-                        body: JSON.stringify({ relay: !this.latest.relay }),
+                        body: JSON.stringify({ relay: expectedRelay }),
                     });
                     const data = await res.json();
                     if (data.success) {
-                        this.latest.relay = data.relay;
                         this.showNotif(data.message);
                     } else {
+                        this._pendingRelay = null;
+                        this.relayOn = !expectedRelay;
+                        this.latest.relay = this.relayOn;
+                        this._startPolling(5000);
                         this.showNotif(data.message, 'error');
                     }
                 } catch (e) {
+                    this._pendingRelay = null;
+                    this.relayOn = !expectedRelay;
+                    this.latest.relay = this.relayOn;
+                    this._startPolling(5000);
                     this.showNotif('Gagal mengirim perintah', 'error');
                 }
                 this.relayLoading = false;
@@ -391,7 +459,11 @@
 
             async toggleMode() {
                 this.modeLoading = true;
-                const newMode = this.latest.mode === 'AUTO' ? 'MANUAL' : 'AUTO';
+                this._lastToggle = Date.now();
+                this.latest.mode = this.modeAuto ? 'AUTO' : 'MANUAL';
+                const expectedMode = this.latest.mode;
+                this._pendingMode = expectedMode;
+                this._startPolling(1000);
                 try {
                     const res = await fetch('/api/device/mode', {
                         method: 'POST',
@@ -399,16 +471,23 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         },
-                        body: JSON.stringify({ mode: newMode }),
+                        body: JSON.stringify({ mode: expectedMode }),
                     });
                     const data = await res.json();
                     if (data.success) {
-                        this.latest.mode = data.mode;
                         this.showNotif(data.message);
                     } else {
+                        this._pendingMode = null;
+                        this.modeAuto = !this.modeAuto;
+                        this.latest.mode = this.modeAuto ? 'AUTO' : 'MANUAL';
+                        this._startPolling(5000);
                         this.showNotif(data.message, 'error');
                     }
                 } catch (e) {
+                    this._pendingMode = null;
+                    this.modeAuto = !this.modeAuto;
+                    this.latest.mode = this.modeAuto ? 'AUTO' : 'MANUAL';
+                    this._startPolling(5000);
                     this.showNotif('Gagal mengirim perintah', 'error');
                 }
                 this.modeLoading = false;
