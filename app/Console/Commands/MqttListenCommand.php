@@ -69,20 +69,27 @@ class MqttListenCommand extends Command
         try {
             $data = json_decode($payload, true);
 
-            if (!$data || !isset($data['tinggi_air'])) {
+            if (!$data || !isset($data['tinggi'])) {
                 $this->warn("Payload tidak valid: {$payload}");
                 return;
             }
 
-            $tinggi = (float) $data['tinggi_air'];
-            $status = $data['status'] ?? WaterLevel::hitungStatus($tinggi);
+            $deviceId = $data['device_id'] ?? '001';
+            $tinggi   = (float) $data['tinggi'];
+            $relay    = isset($data['relay']) ? (bool) $data['relay'] : false;
+            $mode     = $data['mode'] ?? 'AUTO';
+            $status   = WaterLevel::hitungStatus($tinggi);
 
             WaterLevel::create([
-                'tinggi_air' => $tinggi,
-                'status'     => $status,
+                'device_id' => $deviceId,
+                'tinggi'    => $tinggi,
+                'status'    => $status,
+                'relay'     => $relay,
+                'mode'      => $mode,
             ]);
 
-            $this->info("Update: {$tinggi} cm | {$status}");
+            $relayLabel = $relay ? 'ON' : 'OFF';
+            $this->info("Device [{$deviceId}] | {$tinggi}% | Status: {$status} | Relay: {$relayLabel} | Mode: {$mode}");
         } catch (\Throwable $e) {
             $this->error("Parse error: {$e->getMessage()}");
         }

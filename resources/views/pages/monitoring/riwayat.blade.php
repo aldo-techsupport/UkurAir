@@ -17,8 +17,11 @@
                     <thead>
                         <tr class="border-b border-gray-100 dark:border-gray-700/60">
                             <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">No</th>
-                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ketinggian Air</th>
+                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Device</th>
+                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ketinggian</th>
                             <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Relay</th>
+                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Mode</th>
                             <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Waktu</th>
                         </tr>
                     </thead>
@@ -26,7 +29,8 @@
                         @forelse($data as $index => $item)
                         <tr class="border-b border-gray-50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/20 transition">
                             <td class="py-3 px-5 text-gray-600 dark:text-gray-400">{{ ($data->currentPage() - 1) * $data->perPage() + $index + 1 }}</td>
-                            <td class="py-3 px-5 font-medium text-gray-800 dark:text-gray-100">{{ $item->tinggi_air }} cm</td>
+                            <td class="py-3 px-5 text-gray-600 dark:text-gray-400">{{ $item->device_id }}</td>
+                            <td class="py-3 px-5 font-medium text-gray-800 dark:text-gray-100">{{ $item->tinggi }}%</td>
                             <td class="py-3 px-5">
                                 @php
                                     $badgeColor = match($item->status) {
@@ -37,11 +41,27 @@
                                 @endphp
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $badgeColor }}">{{ $item->status }}</span>
                             </td>
+                            <td class="py-3 px-5">
+                                @php
+                                    $relayColor = $item->relay
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $relayColor }}">{{ $item->relay ? 'ON' : 'OFF' }}</span>
+                            </td>
+                            <td class="py-3 px-5">
+                                @php
+                                    $modeColor = $item->mode === 'AUTO'
+                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                        : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $modeColor }}">{{ $item->mode }}</span>
+                            </td>
                             <td class="py-3 px-5 text-gray-600 dark:text-gray-400">{{ $item->updated_at->format('d M Y H:i:s') }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="py-8 text-center text-gray-400 dark:text-gray-500">Belum ada data tersimpan.</td>
+                            <td colspan="7" class="py-8 text-center text-gray-400 dark:text-gray-500">Belum ada data tersimpan.</td>
                         </tr>
                         @endforelse
                     </tbody>

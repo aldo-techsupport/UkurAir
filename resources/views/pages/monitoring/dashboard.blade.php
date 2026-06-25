@@ -1,5 +1,58 @@
 <x-app-layout>
+    @push('styles')
+    <style>
+    .checkbox-wrapper-25 input[type="checkbox"] {
+        background-image: -webkit-linear-gradient(hsla(0,0%,0%,.1), hsla(0,0%,100%,.1)),
+                          -webkit-linear-gradient(left, #f66 50%, #6cf 50%);
+        background-size: 100% 100%, 200% 100%;
+        background-position: 0 0, 15px 0;
+        border-radius: 25px;
+        box-shadow: inset 0 1px 4px hsla(0,0%,0%,.5),
+                    inset 0 0 10px hsla(0,0%,0%,.5),
+                    0 0 0 1px hsla(0,0%,0%,.1),
+                    0 -1px 2px 2px hsla(0,0%,0%,.25),
+                    0 2px 2px 2px hsla(0,0%,100%,.75);
+        cursor: pointer;
+        height: 25px;
+        padding-right: 25px;
+        width: 75px;
+        -webkit-appearance: none;
+        -webkit-transition: .25s;
+        appearance: none;
+        transition: .25s;
+    }
+
+    .checkbox-wrapper-25 input[type="checkbox"]:after {
+        background-color: #eee;
+        background-image: -webkit-linear-gradient(hsla(0,0%,100%,.1), hsla(0,0%,0%,.1));
+        border-radius: 25px;
+        box-shadow: inset 0 1px 1px 1px hsla(0,0%,100%,1),
+                    inset 0 -1px 1px 1px hsla(0,0%,0%,.25),
+                    0 1px 3px 1px hsla(0,0%,0%,.5),
+                    0 0 2px hsla(0,0%,0%,.25);
+        content: '';
+        display: block;
+        height: 25px;
+        width: 50px;
+    }
+
+    .checkbox-wrapper-25 input[type="checkbox"]:checked {
+        background-position: 0 0, 35px 0;
+        padding-left: 25px;
+        padding-right: 0;
+    }
+
+    .checkbox-wrapper-25 input[type="checkbox"]:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    </style>
+    @endpush
     <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto" x-data="waterMonitor()">
+
+        <div x-show="notif" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed bottom-4 right-4 z-50">
+            <div class="px-4 py-3 rounded-lg shadow-lg text-sm font-medium" :class="notif?.type === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'" x-text="notif?.msg"></div>
+        </div>
 
         <div class="sm:flex sm:justify-between sm:items-center mb-8">
             <div class="mb-4 sm:mb-0">
@@ -21,20 +74,10 @@
                         <div class="w-10 h-10 rounded-lg bg-sky-500/20 flex items-center justify-center">
                             <svg class="w-5 h-5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
                         </div>
+                        <span class="text-xs text-gray-400" x-text="'ID: ' + latest.device_id"></span>
                     </div>
-                    <div class="text-2xl font-bold text-gray-800 dark:text-gray-100" x-text="latest.tinggi_air + ' cm'">-- cm</div>
+                    <div class="text-2xl font-bold text-gray-800 dark:text-gray-100" x-text="latest.tinggi + '%'">--%</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ketinggian Air</div>
-                </div>
-            </div>
-            <div class="col-span-12 sm:col-span-6 xl:col-span-3">
-                <div class="bg-white dark:bg-gray-800 shadow-xs rounded-xl p-5">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="w-10 h-10 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-gray-800 dark:text-gray-100" x-text="latest.persen + '%'">--%</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Persentase Pengisian</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-6 xl:col-span-3">
@@ -51,12 +94,29 @@
             <div class="col-span-12 sm:col-span-6 xl:col-span-3">
                 <div class="bg-white dark:bg-gray-800 shadow-xs rounded-xl p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <div class="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="latest.relay ? 'bg-green-500/20' : 'bg-gray-500/20'">
+                            <svg class="w-5 h-5" :class="latest.relay ? 'text-green-500' : 'text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <div class="checkbox-wrapper-25">
+                            <input type="checkbox" :checked="latest.relay" @change="toggleRelay()" :disabled="relayLoading">
                         </div>
                     </div>
-                    <div class="text-lg font-bold text-gray-800 dark:text-gray-100" x-text="latest.waktu || '--'">--</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Update Terakhir</div>
+                    <div class="text-2xl font-bold" :class="latest.relay ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'" x-text="latest.relay ? 'ON' : 'OFF'">--</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Relay</div>
+                </div>
+            </div>
+            <div class="col-span-12 sm:col-span-6 xl:col-span-3">
+                <div class="bg-white dark:bg-gray-800 shadow-xs rounded-xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="latest.mode === 'AUTO' ? 'bg-blue-500/20' : 'bg-orange-500/20'">
+                            <svg class="w-5 h-5" :class="latest.mode === 'AUTO' ? 'text-blue-500' : 'text-orange-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <div class="checkbox-wrapper-25">
+                            <input type="checkbox" :checked="latest.mode === 'AUTO'" @change="toggleMode()" :disabled="modeLoading">
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold" :class="latest.mode === 'AUTO' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'" x-text="latest.mode || '--'">--</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Mode</div>
                 </div>
             </div>
         </div>
@@ -81,12 +141,12 @@
                             <div class="absolute inset-0 border-2 border-gray-300 dark:border-gray-600 rounded-b-2xl rounded-t-lg overflow-hidden bg-gray-50 dark:bg-gray-700/30">
                                 <div class="absolute bottom-0 left-0 right-0 transition-all duration-700 ease-out rounded-b-xl"
                                      :class="waterColor()"
-                                     :style="'height: ' + latest.persen + '%'">
+                                     :style="'height: ' + latest.tinggi + '%'">
                                 </div>
                             </div>
-                            <div class="absolute -top-6 left-0 right-0 text-center text-xs font-medium text-gray-500 dark:text-gray-400">100 cm</div>
-                            <div class="absolute top-1/2 left-0 right-0 text-center text-xs font-bold text-white mix-blend-difference" x-text="latest.persen + '%'"></div>
-                            <div class="absolute -bottom-6 left-0 right-0 text-center text-xs font-medium text-gray-500 dark:text-gray-400">0 cm</div>
+                            <div class="absolute -top-6 left-0 right-0 text-center text-xs font-medium text-gray-500 dark:text-gray-400">100%</div>
+                            <div class="absolute top-1/2 left-0 right-0 text-center text-xs font-bold text-white mix-blend-difference" x-text="latest.tinggi + '%'"></div>
+                            <div class="absolute -bottom-6 left-0 right-0 text-center text-xs font-medium text-gray-500 dark:text-gray-400">0%</div>
                         </div>
                     </div>
                     <div class="mt-6 space-y-2">
@@ -116,9 +176,11 @@
                     <thead>
                         <tr class="border-b border-gray-100 dark:border-gray-700/60">
                             <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">No</th>
-                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ketinggian Air</th>
-                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Persen</th>
+                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Device</th>
+                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ketinggian</th>
                             <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Relay</th>
+                            <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Mode</th>
                             <th class="text-left py-3 px-5 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Waktu</th>
                         </tr>
                     </thead>
@@ -126,16 +188,22 @@
                         <template x-for="(item, index) in historyData" :key="item.id">
                             <tr class="border-b border-gray-50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/20 transition">
                                 <td class="py-3 px-5 text-gray-600 dark:text-gray-400" x-text="index + 1"></td>
-                                <td class="py-3 px-5 font-medium text-gray-800 dark:text-gray-100" x-text="item.tinggi_air + ' cm'"></td>
-                                <td class="py-3 px-5 text-gray-600 dark:text-gray-400" x-text="item.persen + '%'"></td>
+                                <td class="py-3 px-5 text-gray-600 dark:text-gray-400" x-text="item.device_id"></td>
+                                <td class="py-3 px-5 font-medium text-gray-800 dark:text-gray-100" x-text="item.tinggi + '%'"></td>
                                 <td class="py-3 px-5">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" :class="badgeClass(item.status)" x-text="item.status"></span>
+                                </td>
+                                <td class="py-3 px-5">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" :class="item.relay ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'" x-text="item.relay ? 'ON' : 'OFF'"></span>
+                                </td>
+                                <td class="py-3 px-5">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" :class="item.mode === 'AUTO' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'" x-text="item.mode"></span>
                                 </td>
                                 <td class="py-3 px-5 text-gray-600 dark:text-gray-400" x-text="item.waktu_full"></td>
                             </tr>
                         </template>
                         <tr x-show="historyData.length === 0">
-                            <td colspan="5" class="py-8 text-center text-gray-400 dark:text-gray-500">Belum ada data. Pastikan sensor dan MQTT subscriber aktif.</td>
+                            <td colspan="7" class="py-8 text-center text-gray-400 dark:text-gray-500">Belum ada data. Pastikan sensor dan MQTT subscriber aktif.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -149,24 +217,31 @@
     function waterMonitor() {
         return {
             latest: {
-                tinggi_air: {{ $latest ? $latest->tinggi_air : 0 }},
-                persen: {{ $latest ? \App\Models\WaterLevel::hitungPersen($latest->tinggi_air) : 0 }},
+                device_id: '{{ $latest ? $latest->device_id : "-" }}',
+                tinggi: {{ $latest ? $latest->tinggi : 0 }},
                 status: '{{ $latest ? $latest->status : "Tidak Ada Data" }}',
+                relay: {{ $latest && $latest->relay ? 'true' : 'false' }},
+                mode: '{{ $latest ? $latest->mode : "-" }}',
                 waktu: '{{ $latest ? $latest->updated_at->format("d M Y H:i:s") : "-" }}',
             },
             historyData: [
                 @foreach($history as $item)
                 {
                     id: {{ $item->id }},
-                    tinggi_air: {{ $item->tinggi_air }},
-                    persen: {{ \App\Models\WaterLevel::hitungPersen($item->tinggi_air) }},
+                    device_id: '{{ $item->device_id }}',
+                    tinggi: {{ $item->tinggi }},
                     status: '{{ $item->status }}',
+                    relay: {{ $item->relay ? 'true' : 'false' }},
+                    mode: '{{ $item->mode }}',
                     waktu_full: '{{ $item->updated_at->format("d M Y H:i:s") }}',
                 },
                 @endforeach
             ],
             connected: false,
             chart: null,
+            relayLoading: false,
+            modeLoading: false,
+            notif: null,
 
             init() {
                 this.initChart();
@@ -183,10 +258,10 @@
                 this.chart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: this.historyData.map(d => d.waktu),
+                        labels: this.historyData.map(d => d.waktu_full),
                         datasets: [{
-                            label: 'Ketinggian Air (cm)',
-                            data: this.historyData.map(d => d.tinggi_air),
+                            label: 'Ketinggian Air (%)',
+                            data: this.historyData.map(d => d.tinggi),
                             fill: true,
                             backgroundColor: gradient,
                             borderColor: 'rgba(103, 191, 255, 1)',
@@ -206,7 +281,7 @@
                                 max: 100,
                                 grid: { color: 'rgba(156, 163, 175, 0.15)' },
                                 ticks: {
-                                    callback: v => v + ' cm',
+                                    callback: v => v + '%',
                                     color: 'rgba(156, 163, 175, 0.8)',
                                 }
                             },
@@ -227,7 +302,7 @@
                                 padding: 10,
                                 cornerRadius: 8,
                                 callbacks: {
-                                    label: ctx => 'Ketinggian: ' + ctx.parsed.y + ' cm',
+                                    label: ctx => 'Ketinggian: ' + ctx.parsed.y + '%',
                                 }
                             }
                         }
@@ -250,7 +325,7 @@
 
                     if (this.chart) {
                         this.chart.data.labels = historyData.map(d => d.waktu);
-                        this.chart.data.datasets[0].data = historyData.map(d => d.tinggi_air);
+                        this.chart.data.datasets[0].data = historyData.map(d => d.tinggi);
                         this.chart.update('none');
                     }
                 } catch (e) {
@@ -279,10 +354,64 @@
                 return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
             },
             waterColor() {
-                const p = this.latest.persen;
+                const p = this.latest.tinggi;
                 if (p >= 80) return 'bg-green-400/60';
                 if (p >= 30) return 'bg-sky-400/60';
                 return 'bg-red-400/60';
+            },
+
+            showNotif(msg, type = 'success') {
+                this.notif = { msg, type };
+                setTimeout(() => this.notif = null, 3000);
+            },
+
+            async toggleRelay() {
+                this.relayLoading = true;
+                try {
+                    const res = await fetch('/api/device/relay', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
+                        body: JSON.stringify({ relay: !this.latest.relay }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.latest.relay = data.relay;
+                        this.showNotif(data.message);
+                    } else {
+                        this.showNotif(data.message, 'error');
+                    }
+                } catch (e) {
+                    this.showNotif('Gagal mengirim perintah', 'error');
+                }
+                this.relayLoading = false;
+            },
+
+            async toggleMode() {
+                this.modeLoading = true;
+                const newMode = this.latest.mode === 'AUTO' ? 'MANUAL' : 'AUTO';
+                try {
+                    const res = await fetch('/api/device/mode', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
+                        body: JSON.stringify({ mode: newMode }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.latest.mode = data.mode;
+                        this.showNotif(data.message);
+                    } else {
+                        this.showNotif(data.message, 'error');
+                    }
+                } catch (e) {
+                    this.showNotif('Gagal mengirim perintah', 'error');
+                }
+                this.modeLoading = false;
             },
         }
     }

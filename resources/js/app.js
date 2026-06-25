@@ -4,7 +4,6 @@ Livewire.start()
 
 import './bootstrap';
 
-import { Chart } from 'chart.js';
 import flatpickr from 'flatpickr';
 
 Chart.defaults.font.family = '"Inter", sans-serif';

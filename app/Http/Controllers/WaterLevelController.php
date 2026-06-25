@@ -27,17 +27,21 @@ class WaterLevelController extends Controller
 
         if (!$latest) {
             return response()->json([
-                'tinggi_air' => 0,
-                'persen' => 0,
+                'device_id' => '-',
+                'tinggi' => 0,
                 'status' => 'Tidak Ada Data',
+                'relay' => false,
+                'mode' => '-',
                 'waktu' => '-',
             ]);
         }
 
         return response()->json([
-            'tinggi_air' => $latest->tinggi_air,
-            'persen' => WaterLevel::hitungPersen($latest->tinggi_air),
+            'device_id' => $latest->device_id,
+            'tinggi' => $latest->tinggi,
             'status' => $latest->status,
+            'relay' => $latest->relay,
+            'mode' => $latest->mode,
             'waktu' => $latest->updated_at->format('d M Y H:i:s'),
         ]);
     }
@@ -50,9 +54,11 @@ class WaterLevelController extends Controller
         return response()->json($data->map(function ($item) {
             return [
                 'id' => $item->id,
-                'tinggi_air' => $item->tinggi_air,
-                'persen' => WaterLevel::hitungPersen($item->tinggi_air),
+                'device_id' => $item->device_id,
+                'tinggi' => $item->tinggi,
                 'status' => $item->status,
+                'relay' => $item->relay,
+                'mode' => $item->mode,
                 'waktu' => $item->updated_at->format('H:i:s'),
                 'waktu_full' => $item->updated_at->format('d M Y H:i:s'),
             ];
