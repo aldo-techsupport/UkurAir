@@ -6,22 +6,42 @@ Subscribe ke topic MQTT, simpan data ke MySQL (tb_ketinggian_air).
 
 import json
 import logging
+import os
 import signal
 import sys
+from pathlib import Path
+
 import mysql.connector
 import paho.mqtt.client as mqtt
 
-# ── Konfigurasi ──────────────────────────────────────────
-MQTT_BROKER   = "127.0.0.1"
-MQTT_PORT     = 1883
-MQTT_TOPIC    = "tandon/ketinggian"
-MQTT_CLIENT   = "subscriber-ukurair"
+# ── Load .env ────────────────────────────────────────────
+def _load_env(path: Path):
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(key, value)
 
-DB_HOST       = "127.0.0.1"
-DB_PORT       = 3306
-DB_USER       = "root"
-DB_PASSWORD   = ""
-DB_NAME       = "ukurair"
+_load_env(Path(__file__).resolve().parent.parent / ".env")
+
+# ── Konfigurasi dari ENV ─────────────────────────────────
+MQTT_BROKER   = os.getenv("MQTT_BROKER", "127.0.0.1")
+MQTT_PORT     = int(os.getenv("MQTT_PORT", "1883"))
+MQTT_TOPIC    = os.getenv("MQTT_TOPIC", "tandon/ketinggian")
+MQTT_CLIENT   = os.getenv("MQTT_CLIENT_ID", "subscriber-ukurair")
+MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
+
+DB_HOST       = os.getenv("DB_HOST", "127.0.0.1")
+DB_PORT       = int(os.getenv("DB_PORT", "3306"))
+DB_USER       = os.getenv("DB_USERNAME", "root")
+DB_PASSWORD   = os.getenv("DB_PASSWORD", "")
+DB_NAME       = os.getenv("DB_DATABASE", "ukurair")
 
 # ── Logging ──────────────────────────────────────────────
 logging.basicConfig(
@@ -108,6 +128,9 @@ def main():
     client.on_connect    = on_connect
     client.on_message    = on_message
     client.on_disconnect = on_disconnect
+
+    if MQTT_USERNAME:
+        client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD or None)
 
     log.info(f"Connecting ke {MQTT_BROKER}:{MQTT_PORT} ...")
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
