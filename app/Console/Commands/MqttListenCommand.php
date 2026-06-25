@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\WaterLevel;
+use Illuminate\Console\Command;
+use PhpMqtt\Client\ConnectionSettings;
+use PhpMqtt\Client\MqttClient;
+use PhpMqtt\Client\Exceptions\MqttClientException;
+
+class MqttListenCommand extends Command
+{
+    protected $signature = 'mqtt:listen';
+    protected $description = 'Subscribe ke topic MQTT dan update data ketinggian air secara real-time';
+
+    public function handle(): int
+    {
+        $host     = env('MQTT_BROKER', '127.0.0.1');
+        $port     = (int) env('MQTT_PORT', 1883);
+        $topic    = env('MQTT_TOPIC', 'tandon/ketinggian');
+        $clientId = env('MQTT_CLIENT_ID', 'subscriber-ukurair');
+        $username = env('MQTT_USERNAME', '');
+        $password = env('MQTT_PASSWORD', '');
+
+        $this->info("MQTT Listener starting...");
+        $this->info("Broker: {$host}:{$port} | Topic: {$topic}");
+
+        while (true) {
+            try {
+                $client = new MqttClient($host, $port, $clientId, MqttClient::MQTT_3_1_1);
+
+                $settings = new ConnectionSettings();
+                $settings = $settings->setKeepAliveInterval(60);
+                $settings = $settings->setReconnectAutomatically(false);
+                $settings = $settings->setMaxReconnectAttempts(3);
+
+                if ($username) {
+                    $settings = $settings->setUsername($username);
+                    $settings = $settings->setPassword($password ?: null);
+                }
+
+                $client->connect($settings, true);
+                $this->info("Terhubung ke MQTT Broker ({$host}:{$port})");
+
+                $client->subscribe($topic, function (string $topic, string $message) use ($client) {
+                    $this->handleMessage($message);
+                }, MqttClient::QOS_AT_MOST_ONCE);
+
+                $this->info("Subscribe topic: {$topic}");
+                $this->info("Menunggu data...");
+
+                $client->loop(true);
+            } catch (MqttClientException $e) {
+                $this->error("MQTT Error: {$e->getMessage()}");
+                $this->info("Reconnect dalam 5 detik...");
+                sleep(5);
+            } catch (\Throwable $e) {
+                $this->error("Error: {$e->getMessage()}");
+                $this->info("Reconnect dalam 5 detik...");
+                sleep(5);
+            }
+        }
+
+        return self::SUCCESS;
+    }
+
+    private function handleMessage(string $payload): void
+    {
+        try {
+            $data = json_decode($payload, true);
+
+            if (!$data || !isset($data['tinggi_air'])) {
+                $this->warn("Payload tidak valid: {$payload}");
+                return;
+            }
+
+            $tinggi = (float) $data['tinggi_air'];
+            $status = $data['status'] ?? WaterLevel::hitungStatus($tinggi);
+
+            WaterLevel::create([
+                'tinggi_air' => $tinggi,
+                'status'     => $status,
+            ]);
+
+            $this->info("Update: {$tinggi} cm | {$status}");
+        } catch (\Throwable $e) {
+            $this->error("Parse error: {$e->getMessage()}");
+        }
+    }
+}
